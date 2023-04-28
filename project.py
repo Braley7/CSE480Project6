@@ -316,10 +316,21 @@ class Connection(object):
         self.filename = filename
         self.db = Database()
         _ALL_DATABASES.append(self.db)
+        path = "./" + filename
 
-        bool = os.path.exists("./test.db")
+        if os.path.exists(path):
+            with open(path) as file:
+                jsonStr = json.load(file)
 
-        print(bool)
+            self.db.name = jsonStr['name']
+            tables = jsonStr['tables'][0]
+            tbl = Table(tables['name'])
+            tbl.colnames = tables['colnames']
+            tbl.types = tables['types']
+            for elem in tables['rows']:
+                tbl.add_row(list(elem.values())[0])
+            self.db.add_table(tbl)
+            #print()
 
     def execute(self, statement):
         """
@@ -521,7 +532,7 @@ def connect(filename):
     return Connection(filename)
 
 
-conn = Connection("test.db")
+# conn = Connection(" test.db")
 # conn.execute("CREATE TABLE students (name TEXT, grade REAL);")
 # conn.execute("INSERT INTO students VALUES ('James', 2.4), ('Yaxin', 3.5), ('Li', 3.7), ('Charles', 4.0);")
 # conn.execute("SELECT name FROM students WHERE grade > 3.0 ORDER BY name;")
